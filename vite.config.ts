@@ -5,10 +5,10 @@ export default defineConfig({
   plugins: [react()],
   base: './',
   build: {
-    target: 'es2015',
+    target: 'es2017',
     rollupOptions: {
       output: {
-        format: 'iife',
+        format: 'es',
         entryFileNames: 'assets/index.js',
         assetFileNames: 'assets/[name].[ext]'
       }
