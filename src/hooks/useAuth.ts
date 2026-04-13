@@ -11,22 +11,23 @@ function loadSession(): string | null {
 export function useAuth() {
   const [currentUser, setCurrentUser] = useState<string | null>(loadSession);
 
-  async function register(username: string, password: string): Promise<string | null> {
+  function register(username: string, password: string): string | null {
     const trimmed = username.trim();
     if (trimmed.length < 2) return 'errUserShort';
     if (password.length < 4) return 'errPassShort';
-
+    
     const userRef = doc(db, 'users', trimmed);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) return 'errTaken';
-
-    await setDoc(userRef, { password, createdAt: Date.now() });
-    localStorage.setItem(SESSION_KEY, trimmed);
-    setCurrentUser(trimmed);
+    getDoc(userRef).then(snap => {
+      if (snap.exists()) return;
+      setDoc(userRef, { password, createdAt: Date.now() }).then(() => {
+        localStorage.setItem(SESSION_KEY, trimmed);
+        setCurrentUser(trimmed);
+      });
+    });
     return null;
   }
 
-  async function login(username: string, password: string): Promise<string | null> {
+  function login(username: string, password: string): string | null {
     const trimmed = username.trim();
     if (trimmed === 'ori' && password === '5555') {
       localStorage.setItem(SESSION_KEY, 'ori');
@@ -35,12 +36,12 @@ export function useAuth() {
     }
 
     const userRef = doc(db, 'users', trimmed);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) return 'errNotFound';
-    if (userSnap.data().password !== password) return 'errWrongPass';
-
-    localStorage.setItem(SESSION_KEY, trimmed);
-    setCurrentUser(trimmed);
+    getDoc(userRef).then(snap => {
+      if (!snap.exists()) return;
+      if (snap.data().password !== password) return;
+      localStorage.setItem(SESSION_KEY, trimmed);
+      setCurrentUser(trimmed);
+    });
     return null;
   }
 
