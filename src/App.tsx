@@ -16,16 +16,8 @@ export default function App() {
   const { currentUser, register, login, logout, loginAs } = useAuth();
   const { lang, setLang, t } = useLang();
 
-  async function handleRegister(username: string, password: string): Promise<string | null> {
-    return await register(username, password);
-  }
-
-  async function handleLogin(username: string, password: string): Promise<string | null> {
-    return await login(username, password);
-  }
-
   if (!currentUser) {
-    return <AuthScreen onRegister={handleRegister} onLogin={handleLogin} lang={lang} setLang={setLang} t={t} />;
+    return <AuthScreen onRegister={register} onLogin={login} lang={lang} setLang={setLang} t={t} />;
   }
 
   if (currentUser === 'ori') {
@@ -93,14 +85,12 @@ function GameApp({
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('beforeunload', saveTime);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (phase === 'game' || phase === 'roundOver') {
       checkScoreAchievements(totalScore + score);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [score, phase]);
 
   useEffect(() => {
@@ -108,7 +98,6 @@ function GameApp({
       commitGame(score, completedThisGame, buildSession(), mode);
       restartGame();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   function handleReturnToStart() {
