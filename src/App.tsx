@@ -16,12 +16,18 @@ export default function App() {
   const { currentUser, register, login, logout, loginAs } = useAuth();
   const { lang, setLang, t } = useLang();
 
-  // Show auth screen when no user is logged in
-  if (!currentUser) {
-    return <AuthScreen onRegister={register} onLogin={login} lang={lang} setLang={setLang} t={t} />;
+  async function handleRegister(username: string, password: string): Promise<string | null> {
+    return await register(username, password);
   }
 
-  // Admin panel for special credentials
+  async function handleLogin(username: string, password: string): Promise<string | null> {
+    return await login(username, password);
+  }
+
+  if (!currentUser) {
+    return <AuthScreen onRegister={handleRegister} onLogin={handleLogin} lang={lang} setLang={setLang} t={t} />;
+  }
+
   if (currentUser === 'ori') {
     return <AdminScreen onBack={logout} onLoginAs={loginAs} />;
   }
@@ -29,7 +35,6 @@ export default function App() {
   return <GameApp currentUser={currentUser} onLogout={logout} lang={lang} setLang={setLang} t={t} />;
 }
 
-// Separate component so hooks always run with a valid username
 function GameApp({
   currentUser, onLogout, lang, setLang, t,
 }: {
@@ -69,7 +74,6 @@ function GameApp({
     };
   }
 
-  // ── Site-wide session timer ──────────────────────────────────────────────
   const sessionStart = useRef(Date.now());
 
   useEffect(() => {
@@ -92,7 +96,6 @@ function GameApp({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Check score achievements in real time during the game
   useEffect(() => {
     if (phase === 'game' || phase === 'roundOver') {
       checkScoreAchievements(totalScore + score);
@@ -100,7 +103,6 @@ function GameApp({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [score, phase]);
 
-  // Commit stats and continue same category when the game ends
   useEffect(() => {
     if (phase === 'results') {
       commitGame(score, completedThisGame, buildSession(), mode);
